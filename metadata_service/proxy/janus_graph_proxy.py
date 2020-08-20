@@ -16,7 +16,8 @@ class JanusGraphGremlinProxy(AbstractGremlinProxy):
     def __init__(self, *, host: str, port: Optional[int] = None, user: Optional[str] = None,
                  password: Optional[str] = None, traversal_source: 'str' = 'g',
                  driver_remote_connection_options: Mapping[str, Any] = {},
-                 websocket_options: Mapping[str, Any] = {}) -> None:
+                 websocket_options: Mapping[str, Any] = {},
+                 **kwargs) -> None:
         driver_remote_connection_options = dict(driver_remote_connection_options)
 
         # as others, we repurpose host a url

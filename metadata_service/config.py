@@ -13,10 +13,13 @@ PROXY_PASSWORD = 'PROXY_PASSWORD'
 PROXY_ENCRYPTED = 'PROXY_ENCRYPTED'
 PROXY_VALIDATE_SSL = 'PROXY_VALIDATE_SSL'
 PROXY_CLIENT = 'PROXY_CLIENT'
+PROXY_PROJECT_ID = 'PROXY_PROJECT_ID'
+PROXY_CREDENTIALS_FILE = 'PROXY_CREDENTIALS_FILE'
 
 PROXY_CLIENTS = {
     'NEO4J': 'metadata_service.proxy.neo4j_proxy.Neo4jProxy',
-    'ATLAS': 'metadata_service.proxy.atlas_proxy.AtlasProxy'
+    'ATLAS': 'metadata_service.proxy.atlas_proxy.AtlasProxy',
+    'GCP_DATA_CATALOG': 'metadata_service.proxy.gcp_data_catalog_proxy.GCPDataCatalogProxy'
 }
 
 IS_STATSD_ON = 'IS_STATSD_ON'
@@ -87,6 +90,9 @@ class LocalConfig(Config):
     PROXY_CLIENT = PROXY_CLIENTS[os.environ.get('PROXY_CLIENT', 'NEO4J')]
     PROXY_ENCRYPTED = bool(distutils.util.strtobool(os.environ.get(PROXY_ENCRYPTED, 'True')))
     PROXY_VALIDATE_SSL = bool(distutils.util.strtobool(os.environ.get(PROXY_VALIDATE_SSL, 'False')))
+
+    PROXY_PROJECT_ID = os.environ.get('PROXY_PROJECT_ID')
+    PROXY_CREDENTIALS_FILE = os.environ.get('CREDENTIALS_PROXY_FILE')
 
     JANUS_GRAPH_URL = None
 

@@ -27,7 +27,8 @@ class NeptuneGremlinProxy(AbstractGremlinProxy):
     def __init__(self, *, host: str, port: Optional[int] = None, user: str = None,
                  password: Optional[Union[str, Mapping[str, str]]] = None,
                  driver_remote_connection_options: Mapping[str, Any] = {},
-                 aws4auth_options: Mapping[str, Any] = {}, websocket_options: Mapping[str, Any] = {}) -> None:
+                 aws4auth_options: Mapping[str, Any] = {}, websocket_options: Mapping[str, Any] = {},
+                 **kwargs) -> None:
         driver_remote_connection_options = dict(driver_remote_connection_options)
         # as others, we repurpose host a url
         driver_remote_connection_options.update(url=host)

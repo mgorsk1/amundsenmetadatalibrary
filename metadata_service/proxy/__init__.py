@@ -34,6 +34,8 @@ def get_proxy_client() -> BaseProxy:
             password = current_app.config[config.PROXY_PASSWORD]
             encrypted = current_app.config[config.PROXY_ENCRYPTED]
             validate_ssl = current_app.config[config.PROXY_VALIDATE_SSL]
+            project_id = current_app.config[config.PROXY_PROJECT_ID]
+            credentials_file = current_app.config[config.PROXY_CREDENTIALS_FILE]
 
             client = import_string(current_app.config[config.PROXY_CLIENT])
             _proxy_client = client(host=host,
@@ -41,6 +43,8 @@ def get_proxy_client() -> BaseProxy:
                                    user=user,
                                    password=password,
                                    encrypted=encrypted,
-                                   validate_ssl=validate_ssl)
+                                   validate_ssl=validate_ssl,
+                                   project_id=project_id,
+                                   credentials_file=credentials_file)
 
     return _proxy_client

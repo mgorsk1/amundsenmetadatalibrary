@@ -69,7 +69,8 @@ class AtlasProxy(BaseProxy):
                  user: str = 'admin',
                  password: str = '',
                  encrypted: bool = False,
-                 validate_ssl: bool = False) -> None:
+                 validate_ssl: bool = False,
+                 **kwargs) -> None:
         """
         Initiate the Apache Atlas client with the provided credentials
         """

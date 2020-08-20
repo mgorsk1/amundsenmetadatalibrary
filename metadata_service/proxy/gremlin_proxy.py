@@ -38,7 +38,8 @@ class AbstractGremlinProxy(BaseProxy):
     Gremlin Proxy client for the amundsen metadata
     """
 
-    def __init__(self, *, key_property_name: str, remote_connection: DriverRemoteConnection) -> None:
+    def __init__(self, *, key_property_name: str, remote_connection: DriverRemoteConnection,
+                 **kwargs) -> None:
         # these might vary from datastore type to another, but if you change these while talking to the same instance
         # without migration, it will go poorly
         self.key_property_name: str = key_property_name

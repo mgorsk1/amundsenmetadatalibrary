@@ -59,7 +59,7 @@ marshmallow==2.15.3
 marshmallow-annotations==2.4.0
 MarkupSafe==1.1 
 pytz==2018.4
-six==1.11.0
+six==1.13.0
 Werkzeug==0.15.3
 wheel==0.33.1
 neo4j==1.7.6
@@ -72,3 +72,5 @@ beaker>=1.10.0
 mocket==3.7.3
 overrides==2.5
 websocket-client==0.56.0
+google-cloud-datacatalog==1.0.0
+google-api-core==1.22.1
