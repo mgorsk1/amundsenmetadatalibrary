@@ -334,8 +334,83 @@ class GCPDataCatalogProxy(BaseProxy):
                                          resource_type: ResourceType) -> None:
         pass
 
-    def get_dashboard(self, dashboard_uri: str) -> DashboardDetailEntity:
-        pass
+    def get_dashboard(self, id: str) -> DashboardDetailEntity:
+        import time
+        print(1, time.time())
+        entry = self.client.get_entry(id)
+        print(2, time.time())
+        dashboard_metadata = self._get_resource_metadata(entry.name, r'.*Dashboard Metadata$')
+        print(3, time.time())
+        # Workbook Metadata could be used for tables
+        workbook_metadata = self._get_resource_metadata(entry.name, r'.*Workbook Metadata$')
+        print(4, time.time())
+        relative_resource_name_parts = entry.name.split('/')
+
+        # common resource properties
+        _name = dashboard_metadata.get('workbook_name')
+        _description = entry.description
+        _owners = self._get_resource_owners(entry.name)
+        _frequent_users = []  # @todo dashboard - frequent users (can be also used for table)
+
+        # dashboard specific properties
+        _uri = entry.name
+        _cluster = relative_resource_name_parts[1] + '__' + relative_resource_name_parts[3]
+        _group_name = dashboard_metadata.get('site_name')
+        _group_url = ''
+        _product = entry.user_specified_system or entry.integrated_system
+        _url = ''  # @todo dashboard - url
+        _created_timestamp = entry.source_system_timestamps.create_time.seconds
+        _updated_timestamp = entry.source_system_timestamps.update_time.seconds
+        _last_successful_run_timestamp = 0  # @todo dashboard - last successful run timestamp
+        _last_run_timestamp = 0  # @todo dashboard - last run timestamp
+        _last_run_state = dashboard_metadata.get('last_run_state', 'Unknown')  # @todo dashboard - last run state
+        _recent_view_count = dashboard_metadata.get('recent_view_count', 0)  # @todo dashboard - recent view count
+        _chart_names = []  # @todo - dashboard chart names
+        _queries = []  # @todo - dashboard queries
+        _tables = [self._get_table_details_from_dashboard_metadata(t, _cluster)
+                   for t in workbook_metadata.get('upstream_tables', '').split(',')]  # @todo - dashboard tables
+        print(5, time.time())
+        data = dict(
+            uri=_uri, cluster=_cluster, group_name=_group_name, group_url=_group_url, product=_product, name=_name,
+            url=_url, description=_description, created_timestamp=_created_timestamp,
+            updated_timestamp=_updated_timestamp, last_successful_run_timestamp=_last_successful_run_timestamp,
+            last_run_timestamp=_last_run_timestamp, last_run_state=_last_run_state,
+            recent_view_count=_recent_view_count, owners=_owners, frequent_users=_frequent_users, tables=_tables
+        )
+
+        result = DashboardDetailEntity(**data)
+        print(6, time.time())
+        """
+        frequent_users: List[User] = attr.ib(factory=list)
+        chart_names: List[str] = attr.ib(factory=list)
+        queries: List[DashboardQuery] = attr.ib(factory=list)
+        tables: List[PopularTable] = attr.ib(factory=list)
+        tags: List[Tag] = attr.ib(factory=list)
+        badges: List[Tag] = attr.ib(factory=list)
+        """
+
+        return result
+
+    def _get_table_details_from_dashboard_metadata(self, table_details: str, cluster: str) -> dict:
+        pattern = re.compile(r"""
+                    ^   (?P<database>[A-Za-z0-9\s]+)
+                    
+                        (\((?P<conn>.*)\))
+                    \/
+                        (\[(?P<schema>[A-Za-z\s]+)\])
+                    \.
+                        (\[(?P<name>[A-Za-z\s]+)\])
+                    $
+                """, re.X)
+
+        _result = pattern.match(table_details)
+
+        result = _result.groupdict() if _result else dict()
+
+        if result:
+            result['cluster'] = cluster
+
+        return result
 
     def get_dashboard_description(self, *, id: str) -> Description:
         pass
