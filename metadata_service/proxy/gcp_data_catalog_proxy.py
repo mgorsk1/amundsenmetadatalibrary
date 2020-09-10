@@ -335,15 +335,10 @@ class GCPDataCatalogProxy(BaseProxy):
         pass
 
     def get_dashboard(self, id: str) -> DashboardDetailEntity:
-        import time
-        print(1, time.time())
         entry = self.client.get_entry(id)
-        print(2, time.time())
         dashboard_metadata = self._get_resource_metadata(entry.name, r'.*Dashboard Metadata$')
-        print(3, time.time())
         # Workbook Metadata could be used for tables
         workbook_metadata = self._get_resource_metadata(entry.name, r'.*Workbook Metadata$')
-        print(4, time.time())
         relative_resource_name_parts = entry.name.split('/')
 
         # common resource properties
@@ -369,7 +364,6 @@ class GCPDataCatalogProxy(BaseProxy):
         _queries = []  # @todo - dashboard queries
         _tables = [self._get_table_details_from_dashboard_metadata(t, _cluster)
                    for t in workbook_metadata.get('upstream_tables', '').split(',')]  # @todo - dashboard tables
-        print(5, time.time())
         data = dict(
             uri=_uri, cluster=_cluster, group_name=_group_name, group_url=_group_url, product=_product, name=_name,
             url=_url, description=_description, created_timestamp=_created_timestamp,
@@ -379,7 +373,6 @@ class GCPDataCatalogProxy(BaseProxy):
         )
 
         result = DashboardDetailEntity(**data)
-        print(6, time.time())
         """
         frequent_users: List[User] = attr.ib(factory=list)
         chart_names: List[str] = attr.ib(factory=list)
