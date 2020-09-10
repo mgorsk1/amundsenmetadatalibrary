@@ -353,13 +353,13 @@ class GCPDataCatalogProxy(BaseProxy):
         _group_name = dashboard_metadata.get('site_name')
         _group_url = ''
         _product = entry.user_specified_system or entry.integrated_system
-        _url = ''  # @todo dashboard - url
+        _url = f'{workbook_metadata.get("site_name")}/dashboard/{workbook_metadata.get("luid", 0)}'
         _created_timestamp = entry.source_system_timestamps.create_time.seconds
         _updated_timestamp = entry.source_system_timestamps.update_time.seconds
-        _last_successful_run_timestamp = 0  # @todo dashboard - last successful run timestamp
-        _last_run_timestamp = 0  # @todo dashboard - last run timestamp
-        _last_run_state = dashboard_metadata.get('last_run_state', 'Unknown')  # @todo dashboard - last run state
-        _recent_view_count = dashboard_metadata.get('recent_view_count', 0)  # @todo dashboard - recent view count
+        _last_successful_run_timestamp = 1599750840  # @todo dashboard - last successful run timestamp
+        _last_run_timestamp = 1599750840  # @todo dashboard - last run timestamp
+        _last_run_state = dashboard_metadata.get('last_run_state', 'succeeded')  # @todo dashboard - last run state
+        _recent_view_count = dashboard_metadata.get('recent_view_count', 17)  # @todo dashboard - recent view count
         _chart_names = []  # @todo - dashboard chart names
         _queries = []  # @todo - dashboard queries
         _tables = [self._get_table_details_from_dashboard_metadata(t, _cluster)
@@ -390,9 +390,9 @@ class GCPDataCatalogProxy(BaseProxy):
                     
                         (\((?P<conn>.*)\))
                     \/
-                        (\[(?P<schema>[A-Za-z\s]+)\])
+                        (\[(?P<schema>[A-Za-z\s\_]+)\])
                     \.
-                        (\[(?P<name>[A-Za-z\s]+)\])
+                        (\[(?P<name>[A-Za-z\s\_]+)\])
                     $
                 """, re.X)
 
@@ -403,6 +403,9 @@ class GCPDataCatalogProxy(BaseProxy):
         if result:
             result['cluster'] = cluster
 
+        for k, v in result.items():
+            result[k] = v.strip()
+
         return result
 
     def get_dashboard_description(self, *, id: str) -> Description:
@@ -412,7 +415,33 @@ class GCPDataCatalogProxy(BaseProxy):
         pass
 
     def get_resources_using_table(self, *, id: str, resource_type: ResourceType) -> Dict[str, List[DashboardSummary]]:
-        pass
+        dashboards = []
+
+        schema, table = id.split('.')[-1].split('/')
+
+        workbook_table = f'[{schema}].[{table}])'
+
+        query = f'tag:tableau_workbook_metadata.upstream_tables:{workbook_table}'
+
+        for entry in self.client.search_catalog(query=query, scope=self.scope):
+            full_entry = self.client.get_entry(entry.relative_resource_name)
+
+            dashboard_metadata = self._get_resource_metadata(full_entry.name, r'.*Dashboard Metadata$')
+
+            relative_resource_name_parts = full_entry.name.split('/')
+
+            result = DashboardSummary(cluster=relative_resource_name_parts[1],
+                                      group_name=dashboard_metadata.get('site_name'),
+                                      group_url='',
+                                      url='',
+                                      product=entry.user_specified_system or entry.integrated_system,
+                                      name=dashboard_metadata['workbook_name'],
+                                      last_successful_run_timestamp=1599750840,  # @todo remove hardcoded value
+                                      uri=full_entry.name)
+
+            dashboards.append(result)
+
+        return {'dashboards': dashboards}
 
     def get_user(self, *, id: str) -> Union[UserEntity, None]:
         pass
